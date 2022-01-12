@@ -78,10 +78,10 @@ def process (input_image, params, model_params):
 	prinfTick(2) #prints time required till now.
 	print()
 	position = checkPosition(all_peaks) #check position of spine.
-	checkKneeling(all_peaks) #check whether kneeling oernot
-	checkHandFold(all_peaks) #check whether hands are folding or not.
+	left_kneeling, right_kneeling = checkKneeling(all_peaks) #check whether kneeling oernot
+	folding_hands =  checkHandFold(all_peaks) #check whether hands are folding or not.
 	canvas1 = draw(input_image,all_peaks) #show the image.
-	return canvas1 , position
+	return canvas1 , position, left_kneeling, right_kneeling, folding_hands
 
 
 def draw(input_image, all_peaks):
@@ -135,10 +135,13 @@ def checkHandFold(all_peaks):
 					armdist = calcDistance(all_peaks[2][0][0:2], all_peaks[3][0][0:2]) #distance between left arm-joint and left palm.
 					if (distance < (armdist + 100) and distance > (armdist - 100) ): #this value 100 is arbitary. this shall be replaced with a calculation which can adjust to different sizes of people.
 						print("Not Folding Hands")
+						folding_hands = 0
 					else: 
 						print("Folding Hands")
+						folding_hands = 1
 			except Exception as e:
 				print("Folding Hands")
+				folding_hands = 1
 	except Exception as e:
 		try:
 			if(all_peaks[7][0][0:2]):
@@ -147,11 +150,14 @@ def checkHandFold(all_peaks):
 				# print(distance)
 				if (distance < (armdist + 100) and distance > (armdist - 100)):
 					print("Not Folding Hands")
+					folding_hands = 0
 				else: 
 					print("Folding Hands")
+					folding_hands = 1
 		except Exception as e:
 			print("Unable to detect arm joints")
-		
+
+	return folding_hands
 
 def calcDistance(a,b): #calculate distance between two points.
 	try:
@@ -162,6 +168,8 @@ def calcDistance(a,b): #calculate distance between two points.
 		print("unable to calculate distance")
 
 def checkKneeling(all_peaks):
+	left_kneeling = []
+	right_kneeling = []
 	f = 0
 	if (all_peaks[16]):
 		f = 1
@@ -179,12 +187,18 @@ def checkKneeling(all_peaks):
 			rightdegrees = 180 - rightdegrees
 		if (leftdegrees > 60  and rightdegrees > 60): # 60 degrees is trail and error value here. We can tweak this accordingly and results will vary.
 			print ("Both Legs are in Kneeling")
+			right_kneeling = 1
+			left_kneeling = 1
 		elif (rightdegrees > 60):
 			print ("Right leg is kneeling")
+			right_kneeling = 1
 		elif (leftdegrees > 60):
 			print ("Left leg is kneeling")
+			left_kneeling = 1
 		else:
 			print ("Not kneeling")
+			right_kneeling = 0
+			left_kneeling = 0
 
 	except IndexError as e:
 		try:
@@ -199,29 +213,43 @@ def checkKneeling(all_peaks):
 				degrees = 180 - degrees
 			if (degrees > 60):
 				print ("Both Legs Kneeling")
+				right_kneeling = 1
+				left_kneeling = 1
 			else:
 				print("Not Kneeling")
+				right_kneeling = 0
+				left_kneeling = 0
 		except Exception as e:
 			print("legs not detected")
+			right_kneeling = 0
+			left_kneeling = 0
+
+	return left_kneeling, right_kneeling
 
 
 
 def showimage(img): #sometimes opencv will oversize the image when using using `cv2.imshow()`. This function solves that issue.
-    screen_res = 1280, 720 #my screen resolution.
-    scale_width = screen_res[0] / img.shape[1]
-    scale_height = screen_res[1] / img.shape[0]
-    scale = min(scale_width, scale_height)
-    window_width = int(img.shape[1] * scale)
-    window_height = int(img.shape[0] * scale)
-    cv2.namedWindow('image', cv2.WINDOW_NORMAL)
-    cv2.resizeWindow('image', window_width, window_height)
-    cv2.imshow('image', img)
+    #screen_res = 1280, 720 #my screen resolution.
+    #scale_width = screen_res[0] / img.shape[1]
+    #scale_height = screen_res[1] / img.shape[0]
+    #scale = min(scale_width, scale_height)
+    #window_width = int(img.shape[1] * scale)
+    #window_height = int(img.shape[0] * scale)
+    #cv2.namedWindow('image', cv2.WINDOW_NORMAL)
+    #cv2.resizeWindow('image', window_width, window_height)
+    #cv2.imshow('image', img)
+    cv2.imwrite('image.png', img)
     cv2.waitKey(0)
-    cv2.destroyAllWindows()
+    #cv2.destroyAllWindows()
 
 def prinfTick(i): #Time calculation to keep a trackm of progress
     toc = time.time()
-    print ('processing time%d is %.5f' % (i,toc - tic))        
+    print ('processing time%d is %.5f' % (i,toc - tic))
+
+def save_results(results):
+	# header = 'Time, ID, straight, reclined, hunchback, left_kneeling, right_kneeling, folding_hands'
+	with open("test_results.csv", "a") as f:
+		f.write(str(results)+'\n')
 
 if __name__ == '__main__': #main function of the program
 	tic = time.time()
@@ -234,11 +262,23 @@ if __name__ == '__main__': #main function of the program
 	if(vi == False):
 	    time.sleep(2)
 	    params, model_params = config_reader()
-	    canvas, position= process('./sample_images/straight_flip.jpg', params, model_params)
+	    canvas, position, left_kneeling, right_kneeling, folding_hands = process('./sample_images/fra_hunchback.jpeg', params, model_params)
 	    showimage(canvas)
-	    if (position == 1):
-	    	print("Hunchback")
-	    elif (position == -1):
-	    	print ("Reclined")
-	    else:
-	    	print("Straight")
+		if (position == 1):
+			print("Hunchback")
+			hunchback=1
+			reclined=0
+			straight=0
+		elif (position == -1):
+			print("Reclined")
+			hunchback=0
+			reclined=1
+			straight=0
+		else:
+			print("Straight")
+			hunchback=0
+			reclined=0
+			straight=1
+			# back = 0
+	result = [tic, 'id', straight, reclined, hunchback, left_kneeling, right_kneeling, folding_hands]
+	save_results(", ".join( repr(e) for e in result ))
