@@ -255,7 +255,7 @@ def save_results(results):
 	# with open("test_results.csv", "a") as f:
 	# 	f.write(str(results)+'\n')
 
-	filename = 'test_results.csv'
+	filename = 'results/results_table.csv'
 	file_exists = os.path.isfile(filename)
 
 	with open (filename, 'a') as csvfile:
@@ -264,10 +264,11 @@ def save_results(results):
 
 		if not file_exists:
 			writer.writeheader()  # file doesn't exist yet, write a header
-
 		writer.writerow({'TimeStamp': result[0], 'ID': result[1],
 						 'Back_Straight': result[2], 'Back_Reclined': result[3], 'Back_Hunchback': result[4],
 						 'Left_kneeling': result[5], 'Right_kneeling': result[6], 'Folding_hands': result[7]})
+
+
 
 if __name__ == '__main__': #main function of the program
 	tic = time.time()

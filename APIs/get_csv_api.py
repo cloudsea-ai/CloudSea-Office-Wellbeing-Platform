@@ -9,7 +9,7 @@ def get_files():
 
     """Download a file."""
     try:
-        return send_from_directory(DOWNLOAD_DIRECTORY, 'test_results.csv', as_attachment=True)
+        return send_from_directory(DOWNLOAD_DIRECTORY, 'results_table.csv', as_attachment=True)
     except FileNotFoundError:
         abort(404)
 
