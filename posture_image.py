@@ -7,6 +7,10 @@ from config_reader import config_reader
 from scipy.ndimage.filters import gaussian_filter
 from model import get_testing_model
 
+import os.path
+import csv
+
+
 tic=0
 # visualize
 colors = [[255, 0, 0], [255, 85, 0], [255, 170, 0], [255, 255, 0], [170, 255, 0], [85, 255, 0],
@@ -248,8 +252,22 @@ def prinfTick(i): #Time calculation to keep a trackm of progress
 
 def save_results(results):
 	# header = 'Time, ID, straight, reclined, hunchback, left_kneeling, right_kneeling, folding_hands'
-	with open("test_results.csv", "a") as f:
-		f.write(str(results)+'\n')
+	# with open("test_results.csv", "a") as f:
+	# 	f.write(str(results)+'\n')
+
+	filename = 'test_results.csv'
+	file_exists = os.path.isfile(filename)
+
+	with open (filename, 'a') as csvfile:
+		headers = ['TimeStamp', 'ID', 'Back_Straight', 'Back_Reclined', 'Back_Hunchback', 'Left_kneeling', 'Right_kneeling', 'Folding_hands']
+		writer = csv.DictWriter(csvfile, delimiter=',', lineterminator='\n',fieldnames=headers)
+
+		if not file_exists:
+			writer.writeheader()  # file doesn't exist yet, write a header
+
+		writer.writerow({'TimeStamp': result[0], 'ID': result[1],
+						 'Back_Straight': result[2], 'Back_Reclined': result[3], 'Back_Hunchback': result[4],
+						 'Left_kneeling': result[5], 'Right_kneeling': result[6], 'Folding_hands': result[7]})
 
 if __name__ == '__main__': #main function of the program
 	tic = time.time()
@@ -281,4 +299,4 @@ if __name__ == '__main__': #main function of the program
 			straight=1
 			# back = 0
 	result = [tic, 'id', straight, reclined, hunchback, left_kneeling, right_kneeling, folding_hands]
-	save_results(", ".join( repr(e) for e in result ))
+	save_results(result)
