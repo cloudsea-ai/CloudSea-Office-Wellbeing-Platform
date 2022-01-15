@@ -118,6 +118,7 @@ def checkPosition(all_peaks):
     except Exception as e:
         print("person not in lateral view and unable to detect ears or hip")
 
+
 #calculate angle between two points with respect to x-axis (horizontal axis)
 def calcAngle(a, b):
     try:
@@ -268,10 +269,9 @@ def save_results(results):
 						 'Back_Straight': result[2], 'Back_Reclined': result[3], 'Back_Hunchback': result[4],
 						 'Left_kneeling': result[5], 'Right_kneeling': result[6], 'Folding_hands': result[7]})
 
-
-
 if __name__ == '__main__': #main function of the program
 	tic = time.time()
+	path_to_image = './photos/'
 	print('start processing...')
 
 	model = get_testing_model()
@@ -281,7 +281,7 @@ if __name__ == '__main__': #main function of the program
 	if(vi == False):
 	    time.sleep(2)
 	    params, model_params = config_reader()
-	    canvas, position, left_kneeling, right_kneeling, folding_hands = process('./sample_images/fra_hunchback.jpeg', params, model_params)
+	    canvas, position, left_kneeling, right_kneeling, folding_hands = process(path_to_image + 'fra_hunchback.jpeg', params, model_params)
 	    showimage(canvas)
 		if (position == 1):
 			print("Hunchback")
@@ -293,11 +293,19 @@ if __name__ == '__main__': #main function of the program
 			hunchback=0
 			reclined=1
 			straight=0
-		else:
+		elif (position == 0):
 			print("Straight")
 			hunchback=0
 			reclined=0
 			straight=1
 			# back = 0
-	result = [tic, 'id', straight, reclined, hunchback, left_kneeling, right_kneeling, folding_hands]
-	save_results(result)
+		else:
+			hunchback = 0
+			reclined = 0
+			straight = 0
+	if hunchback == 0 and reclined == 0 and straight == 0:
+		os.remove(path_to_image + '/fra_hunchback.jpeg')
+	else:
+		result = [tic, 'id', straight, reclined, hunchback, left_kneeling, right_kneeling, folding_hands]
+		save_results(result)
+		os.remove(path_to_image + '/fra_hunchback.jpeg')
