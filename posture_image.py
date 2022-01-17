@@ -20,7 +20,7 @@ colors = [[255, 0, 0], [255, 85, 0], [255, 170, 0], [255, 255, 0], [170, 255, 0]
           [170, 0, 255], [255, 0, 255], [255, 0, 170], [255, 0, 85]]
 
 
-def process (input_image, params, model_params):
+def process (input_image, params, model_params, model):
 	''' Start of finding the Key points of full body using Open Pose.'''
 	oriImg = cv2.imread(input_image)  # B,G,R order
 	multiplier = [x * model_params['boxsize'] / oriImg.shape[0] for x in params['scale_search']]
@@ -251,12 +251,12 @@ def prinfTick(i): #Time calculation to keep a trackm of progress
     toc = time.time()
     print ('processing time%d is %.5f' % (i,toc - tic))
 
-def save_results(results):
+def save_results(path, result):
 	# header = 'Time, ID, straight, reclined, hunchback, left_kneeling, right_kneeling, folding_hands'
 	# with open("test_results.csv", "a") as f:
 	# 	f.write(str(results)+'\n')
 
-	filename = 'results/results_table.csv'
+	filename = path
 	file_exists = os.path.isfile(filename)
 
 	with open (filename, 'a') as csvfile:
@@ -269,43 +269,85 @@ def save_results(results):
 						 'Back_Straight': result[2], 'Back_Reclined': result[3], 'Back_Hunchback': result[4],
 						 'Left_kneeling': result[5], 'Right_kneeling': result[6], 'Folding_hands': result[7]})
 
-if __name__ == '__main__': #main function of the program
+def recognize_posture(filepath):
 	tic = time.time()
-	path_to_image = './photos/'
+
 	print('start processing...')
 
 	model = get_testing_model()
-	model.load_weights('./model/keras/model.h5')
+	model.load_weights('../model/keras/model.h5')
+	csv_path = '../results/results_csv_api.csv'
 
-	vi=False
-	if(vi == False):
-	    time.sleep(2)
-	    params, model_params = config_reader()
-	    canvas, position, left_kneeling, right_kneeling, folding_hands = process(path_to_image + 'fra_hunchback.jpeg', params, model_params)
-	    showimage(canvas)
+	vi = False
+	if (vi == False):
+		time.sleep(2)
+		params, model_params = config_reader()
+		canvas, position, left_kneeling, right_kneeling, folding_hands = process(filepath, params, model_params, model)
+		# showimage(canvas)
 		if (position == 1):
 			print("Hunchback")
-			hunchback=1
-			reclined=0
-			straight=0
+			hunchback = 1
+			reclined = 0
+			straight = 0
 		elif (position == -1):
 			print("Reclined")
-			hunchback=0
-			reclined=1
-			straight=0
+			hunchback = 0
+			reclined = 1
+			straight = 0
 		elif (position == 0):
 			print("Straight")
-			hunchback=0
-			reclined=0
-			straight=1
-			# back = 0
+			hunchback = 0
+			reclined = 0
+			straight = 1
+		# back = 0
 		else:
 			hunchback = 0
 			reclined = 0
 			straight = 0
 	if hunchback == 0 and reclined == 0 and straight == 0:
-		os.remove(path_to_image + '/fra_hunchback.jpeg')
+		os.remove(filepath)
 	else:
 		result = [tic, 'id', straight, reclined, hunchback, left_kneeling, right_kneeling, folding_hands]
-		save_results(result)
-		os.remove(path_to_image + '/fra_hunchback.jpeg')
+		save_results(csv_path, result)
+		os.remove(filepath)
+
+# if __name__ == '__main__': #main function of the program
+# 	tic = time.time()
+# 	path_to_image = './photos/'
+# 	print('start processing...')
+#
+# 	model = get_testing_model()
+# 	model.load_weights('./model/keras/model.h5')
+#
+# 	vi=False
+# 	if(vi == False):
+# 	    time.sleep(2)
+# 	    params, model_params = config_reader()
+# 	    canvas, position, left_kneeling, right_kneeling, folding_hands = process(path_to_image + 'fra_hunchback.jpeg', params, model_params)
+# 	    showimage(canvas)
+# 		if (position == 1):
+# 			print("Hunchback")
+# 			hunchback=1
+# 			reclined=0
+# 			straight=0
+# 		elif (position == -1):
+# 			print("Reclined")
+# 			hunchback=0
+# 			reclined=1
+# 			straight=0
+# 		elif (position == 0):
+# 			print("Straight")
+# 			hunchback=0
+# 			reclined=0
+# 			straight=1
+# 			# back = 0
+# 		else:
+# 			hunchback = 0
+# 			reclined = 0
+# 			straight = 0
+# 	if hunchback == 0 and reclined == 0 and straight == 0:
+# 		os.remove(path_to_image + '/fra_hunchback.jpeg')
+# 	else:
+# 		result = [tic, 'id', straight, reclined, hunchback, left_kneeling, right_kneeling, folding_hands]
+# 		save_results(result)
+# 		os.remove(path_to_image + '/fra_hunchback.jpeg')
