@@ -5,7 +5,7 @@ import json
 import cv2
 
 addr = 'http://localhost:5000'
-url = addr + '/api_test_image'
+url = addr + '/posture_recognition'
 
 # prepare headers for http request
 content_type = 'image/jpeg'
@@ -18,11 +18,12 @@ def post_image(img_file):
     # file_name.close()
     # img = open(img_file, 'rb').read()
     # response = requests.post(test_url, data=img, headers=headers)
-    requests.post(url, files={'image': open(img_file, 'rb')})
+    response = requests.post(url, files={'image': open(img_file, 'rb')})
 
-    # return response
+    return response
 
-post_image('./sample_images/fra_recline.jpeg')
+response = post_image('./sample_images/fra_straight.jpeg')
+print(json.loads(response.text))
 # print(post_image('./sample_images/fra_recline.jpeg'))
 # print(response.text)
 # response = post_image('./sample_images/fra_recline.jpeg')
@@ -32,4 +33,4 @@ post_image('./sample_images/fra_recline.jpeg')
 # _, img_encoded = cv2.imencode('.jpg', img)
 # # send http request with image and receive response
 # response = requests.post(test_url, data=img_encoded.tostring(), headers=headers)
-# # decode response
+# # decode response””
