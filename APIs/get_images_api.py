@@ -2,6 +2,7 @@ from flask import Flask, request, Response
 import jsonpickle
 import numpy as np
 import cv2
+# import posture_image
 from posture_image import recognize_posture
 from model import get_testing_model
 from config_reader import config_reader
@@ -14,6 +15,7 @@ import os
 # Initialize the Flask application
 app = Flask(__name__)
 
+# model = load_trained_model()
 
 # route http posts to this method
 @app.route('/posture_recognition', methods=['POST'])
@@ -29,6 +31,10 @@ def posture():
     # img = cv2.imdecode(npimg, cv2.IMREAD_COLOR)
     # print(file)
     # filename = file.filename
+    # model = get_testing_model()
+    # model.load_weights('../model/keras/model.h5')
+    # params, model_params = config_reader()
+    # recognize_posture(filepath, model, params, model_params)
     recognize_posture(filepath)
 
 
