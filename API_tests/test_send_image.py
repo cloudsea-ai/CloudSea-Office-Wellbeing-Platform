@@ -2,11 +2,11 @@ from __future__ import print_function
 import requests
 import time
 import json
-import cv2
+import settings as s
 
-addr = 'http://localhost:5000'
+addr = 'http://clowee-ws.rd.tuni.fi:5000'
 url = addr + '/posture_recognition'
-
+idS = "Sergio"
 # prepare headers for http request
 content_type = 'image/jpeg'
 # headers = {'content-type': content_type}
@@ -22,7 +22,9 @@ def post_image(img_file):
 
     return response
 
-response = post_image('./sample_images/fra_straight.jpeg')
+#image_addr = './sample_images/fra_straight.jpeg'
+image_addr = "/home/pi/Documents/CaptAndSend/" + idS + "_1.jpg"
+response = post_image(image_addr)
 print(json.loads(response.text))
 # print(post_image('./sample_images/fra_recline.jpeg'))
 # print(response.text)
@@ -33,4 +35,3 @@ print(json.loads(response.text))
 # _, img_encoded = cv2.imencode('.jpg', img)
 # # send http request with image and receive response
 # response = requests.post(test_url, data=img_encoded.tostring(), headers=headers)
-# # decode response””
